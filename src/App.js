@@ -2,7 +2,11 @@
 import './App.css';
 import Form from './components/Form'
 import axios from 'axios'
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
+import * as yup from 'yup'
+
+import schema from './validation/formSchema';
+
 
   const initialFormValues = {
     first_name: '', 
@@ -20,27 +24,49 @@ import React, {useState, useEffect} from 'react'
     tos: false, 
   }
 
-  const initialTeam = []
-  const initialDisabled = true;
-
 
 function App() {
 
-
+  
   const [formValues, setFormValues] = useState(initialFormValues)
-  const [users, setUsers] = useState(initialTeam)
   const [formErrors, setFormErrors] = useState(initialFormErrors)
-  const [disabled, setDisabled] = useState(initialDisabled);
+  const [users, setUsers] = useState([])
 
-  axios.get('https://reqres.in/api/users')
-  .then(res => {
-    setUsers(res.data);
-  })
-  .catch(err => console.error(err))
+  const validate= (name, value) => {
+    yup.reach(schema, name)
+    .validate(value)
+    .then(() => setFormErrors({...formErrors, [name]: ''}))
+    .catch(err => setFormErrors({...formErrors, [name]: err.errors[0]}))
+  }
+
+  const handleChange = (name, value) => {
+    validate(name, value);
+    setFormValues({...formValues, [name]: value});
+  }
+
+  const handleSubmit = newUser => {
+    axios.post('https://reqres.in/api/users', formValues)
+    .then(res => {
+      setUsers([res.data, ...users]);
+      setFormValues(initialFormValues);
+    })
+    .catch(err => console.error(err))
+  }
+
+
+
+
+
 
   return (
     <div className="App">
-      <Form />
+      <Form 
+      values={formValues}
+      change={handleChange}
+      submit={handleSubmit}
+      errors={formErrors}/>
+        <p>{users.createdAt}</p>
+        <p> {users.email} </p>
     </div>
   );
 }
