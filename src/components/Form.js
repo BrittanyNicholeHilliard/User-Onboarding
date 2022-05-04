@@ -5,7 +5,7 @@ import React from 'react'
 export default function Form(props) {
 
  const { change, submit, errors } = props 
- const {first_name, last_name, email, password, checked} = props.formValues;
+ const {first_name, last_name, email, password, checked} = props.values;
 
     const onSubmit = evt => {
     evt.preventDefault()
